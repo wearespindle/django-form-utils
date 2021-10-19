@@ -39,33 +39,29 @@ except ImportError:
 
 
 class ImageWidget(forms.FileInput):
-    template = '%(input)s<br />%(image)s'
-
     def __init__(self, attrs=None, template=None, width=200, height=200):
         if template is not None:
             self.template = template
         self.width = width
         self.height = height
-        super(ImageWidget, self).__init__(attrs)
+        super().__init__(attrs)
 
-    def render(self, name, value, attrs=None):
-        input_html = super(ImageWidget, self).render(name, value, attrs)
-        if hasattr(value, 'width') and hasattr(value, 'height'):
-            image_html = thumbnail(value.name, self.width, self.height)
-            output = self.template % {'input': input_html,
-                                      'image': image_html}
-        else:
-            output = input_html
-        return mark_safe(output)
+    def get_context(self, name, value, attrs=None):
+        context = super().get_context(name, value, attrs)
+        if value:
+            context['widget']['image'] = thumbnail(value.name, self.width, self.height)
+            context['widget']['template_name'] = 'widgets/imagewidget.html'
+        return context
 
 
 class ClearableFileInput(forms.MultiWidget):
     default_file_widget_class = forms.FileInput
-    template = '%(input)s Clear: %(checkbox)s'
+    template_name = 'widgets/clearablefileinput.html'
 
     def __init__(self, file_widget=None, attrs=None, template=None):
         if template is not None:
             self.template = template
+
         file_widget = file_widget or self.default_file_widget_class()
         super().__init__(
             widgets=[file_widget, forms.CheckboxInput()],
@@ -76,6 +72,7 @@ class ClearableFileInput(forms.MultiWidget):
             self.value = value[0]
         else:
             self.value = value
+
         return super().render(name, value, attrs, renderer)
 
     def decompress(self, value):

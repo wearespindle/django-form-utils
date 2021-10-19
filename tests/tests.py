@@ -641,8 +641,8 @@ class ClearableFileFieldTests(TestCase):
         form = TestForm(files={'f_0': self.upload})
         self.assertHTMLEqual(
             six.text_type(form['f']),
-            u'<input type="file" name="f_0" id="id_f_0" />'
-            u' Clear: <input type="checkbox" name="f_1" id="id_f_1" />'
+            u'<input type="file" name="f_0" required id="id_f_0" />'
+            u' Clear: <input type="checkbox" name="f_1" required id="id_f_1" />'
             )
 
     def test_not_cleared(self):
@@ -713,7 +713,11 @@ class ClearableFileFieldTests(TestCase):
         widget = ImageWidget()
         file_field = forms.ImageField(widget=widget)
         field = ClearableFileField(file_field=file_field)
-        self.assertTrue(field.fields[0].widget is widget)
+        self.assertTrue(isinstance(field.fields[0].widget, ImageWidget))
+
+        # Normally a different widget is expected.
+        field = ClearableFileField()
+        self.assertTrue(isinstance(field.fields[0].widget, forms.FileInput))
 
     def test_clearable_image_field(self):
         """
