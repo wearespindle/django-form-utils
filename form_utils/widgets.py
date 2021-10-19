@@ -39,18 +39,23 @@ except ImportError:
 
 
 class ImageWidget(forms.FileInput):
-    def __init__(self, attrs=None, template=None, width=200, height=200):
-        if template is not None:
-            self.template = template
+    image_template_name = 'widgets/imagewidget.html'
+    # Not the best kind of checking, but it will do.
+    file_extensions = ('.png', '.jpg', '.gif', '.jpeg')
+
+    def __init__(self, attrs=None, template_name=None, width=200, height=200):
+        if template_name is not None:
+            self.image_template_name = template_name
         self.width = width
         self.height = height
         super().__init__(attrs)
 
     def get_context(self, name, value, attrs=None):
         context = super().get_context(name, value, attrs)
-        if value:
+        if value and value.name and any(value.name.endswith(ext) for ext in self.file_extensions):
             context['widget']['image'] = thumbnail(value.name, self.width, self.height)
-            context['widget']['template_name'] = 'widgets/imagewidget.html'
+            context['widget']['template_name'] = self.image_template_name
+            self.template_name = self.image_template_name
         return context
 
 
@@ -58,9 +63,9 @@ class ClearableFileInput(forms.MultiWidget):
     default_file_widget_class = forms.FileInput
     template_name = 'widgets/clearablefileinput.html'
 
-    def __init__(self, file_widget=None, attrs=None, template=None):
-        if template is not None:
-            self.template = template
+    def __init__(self, file_widget=None, attrs=None, template_name=None):
+        if template_name is not None:
+            self.template_name = template_name
 
         file_widget = file_widget or self.default_file_widget_class()
         super().__init__(

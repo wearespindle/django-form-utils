@@ -470,11 +470,11 @@ class TemplatetagTests(TestCase):
         u'<ul>'
         u'<li>'
         u'<label for="id_boredom">Boredom%(suffix)s</label>'
-        u'<input type="%(type)s" name="boredom" id="id_boredom" />'
+        u'<input type="%(type)s" name="boredom" required id="id_boredom" />'
         u'</li>'
         u'<li>'
         u'<label for="id_excitement">Excitement%(suffix)s</label>'
-        u'<input type="%(type)s" name="excitement" id="id_excitement" />'
+        u'<input type="%(type)s" name="excitement" required id="id_excitement" />'
         u'</li>'
         u'</ul>'
         u'</fieldset>'
@@ -498,11 +498,11 @@ class TemplatetagTests(TestCase):
         u'<ul>'
         u'<li class="required">'
         u'<label for="id_name">Name%(suffix)s</label>'
-        u'<input type="text" name="name" id="id_name" />'
+        u'<input type="text" name="name" required id="id_name" />'
         u'</li>'
         u'<li class="required">'
         u'<label for="id_position">Position%(suffix)s</label>'
-        u'<input type="text" name="position" id="id_position" />'
+        u'<input type="text" name="position" required id="id_position" />'
         u'</li>'
         u'</ul>'
         u'</fieldset>'
@@ -522,6 +522,7 @@ class TemplatetagTests(TestCase):
         A ``BetterForm`` renders as a list of fields within each fieldset.
 
         """
+        self.maxDiff = None
         form = ApplicationForm()
         html = Template(
             '{% load form_utils %}{{ form|render }}'
@@ -558,10 +559,9 @@ class ImageWidgetTests(TestCase):
         ``ImageWidget`` respects a custom template.
 
         """
-        widget = ImageWidget(template='<div>%(image)s</div>'
-                             '<div>%(input)s</div>')
+        widget = ImageWidget(template_name='tests/test_custom_template_imagewidget.html')
         html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
-        self.assertTrue(html.startswith('<div><img'))
+        self.assertTrue(html.startswith('<div><img'), html)
 
 
 class ClearableFileInputTests(TestCase):
@@ -597,6 +597,7 @@ class ClearableFileInputTests(TestCase):
         """
         class ClearableImageWidget(ClearableFileInput):
             default_file_widget_class = ImageWidget
+
         widget = ClearableImageWidget()
         html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
         self.assertIn('<img', html)
@@ -606,7 +607,7 @@ class ClearableFileInputTests(TestCase):
         ``ClearableFileInput`` respects its ``template`` argument.
 
         """
-        widget = ClearableFileInput(template='Clear: %(checkbox)s %(input)s')
+        widget = ClearableFileInput(template_name='tests/test_custom_template_clearablefileinput.html')
         html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
         self.assertHTMLEqual(
             html,
@@ -621,7 +622,8 @@ class ClearableFileInputTests(TestCase):
 
         """
         class ReversedClearableFileInput(ClearableFileInput):
-            template = 'Clear: %(checkbox)s %(input)s'
+            template_name = 'tests/test_custom_template_clearablefileinput.html'
+
         widget = ReversedClearableFileInput()
         html = widget.render('fieldname', 'tiny.png')
         self.assertHTMLEqual(
@@ -736,9 +738,9 @@ class ClearableFileFieldTests(TestCase):
         the widget.
 
         """
-        tpl = 'Clear: %(checkbox)s %(input)s'
-        field = ClearableFileField(template=tpl)
-        self.assertEqual(field.widget.template, tpl)
+        tpl = 'tests/test_custom_template_clearablefileinput'
+        field = ClearableFileField(template_name=tpl)
+        self.assertEqual(field.widget.template_name, tpl)
 
     def test_custom_widget_by_subclassing(self):
         """
