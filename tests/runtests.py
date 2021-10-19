@@ -18,13 +18,19 @@ if not settings.configured:
         MEDIA_URL='/media/',
         STATIC_URL='/static/',
         MIDDLEWARE_CLASSES=[],
-        )
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [],
+                'APP_DIRS': True,
+            },
+        ],
+    )
 
     settings.configure(**settings_dict)
 
 
-if django.VERSION >= (1, 7):
-    django.setup()
+django.setup()
 
 
 def runtests(*test_args):

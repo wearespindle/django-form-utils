@@ -63,21 +63,20 @@ class ClearableFileInput(forms.MultiWidget):
     default_file_widget_class = forms.FileInput
     template = '%(input)s Clear: %(checkbox)s'
 
-    def __init__(self, file_widget=None,
-                 attrs=None, template=None):
+    def __init__(self, file_widget=None, attrs=None, template=None):
         if template is not None:
             self.template = template
         file_widget = file_widget or self.default_file_widget_class()
-        super(ClearableFileInput, self).__init__(
+        super().__init__(
             widgets=[file_widget, forms.CheckboxInput()],
             attrs=attrs)
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if isinstance(value, list):
             self.value = value[0]
         else:
             self.value = value
-        return super(ClearableFileInput, self).render(name, value, attrs)
+        return super().render(name, value, attrs, renderer)
 
     def decompress(self, value):
         # the clear checkbox is never initially checked

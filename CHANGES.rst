@@ -1,8 +1,14 @@
 CHANGES
 =======
 
-tip (unreleased)
+master (unreleased)
 ----------------
+
+- Added GitHub actions as CI.
+- Fixed ``python_2_unicode_compatible`` imports.
+- Fixed ``six`` imports.
+- Fixed compatibility issues with Django 3.0
+- Dropped support for Python 2.
 
 1.0.3 (2015-08-25)
 ------------------

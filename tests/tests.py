@@ -2,21 +2,19 @@
 from __future__ import unicode_literals
 
 import django
+import six
 from django import forms
-from django import template
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db.models.fields.files import (
-    FieldFile, ImageFieldFile, FileField, ImageField)
+from django.db.models.fields.files import (FieldFile, FileField, ImageField,
+                                           ImageFieldFile)
+from django.template import Context, Template
 from django.test import TestCase
-from django.utils import six
-
+from form_utils.fields import ClearableFileField, ClearableImageField
+from form_utils.forms import BetterForm, BetterModelForm
+from form_utils.widgets import ClearableFileInput, ImageWidget
 from mock import patch
 
-from form_utils.forms import BetterForm, BetterModelForm
-from form_utils.widgets import ImageWidget, ClearableFileInput
-from form_utils.fields import ClearableFileField, ClearableImageField
-
-from .models import Person, Document
+from .models import Document, Person
 
 
 class ApplicationForm(BetterForm):
@@ -378,8 +376,8 @@ class BetterFormTests(TestCase):
         """
         form = HoneypotForm()
         attrs = form['honeypot'].row_attrs
-        self.assertTrue(u'style="display: none"' in attrs)
-        self.assertTrue(u'class="required"' in attrs)
+        self.assertIn(u'style="display: none"', attrs)
+        self.assertIn(u'class="required"', attrs)
 
     def test_row_attrs_by_iteration(self):
         """
@@ -390,8 +388,8 @@ class BetterFormTests(TestCase):
         form = HoneypotForm()
         honeypot = [field for field in form if field.name=='honeypot'][0]
         attrs = honeypot.row_attrs
-        self.assertTrue(u'style="display: none"' in attrs)
-        self.assertTrue(u'class="required"' in attrs)
+        self.assertIn(u'style="display: none"', attrs)
+        self.assertIn(u'class="required"', attrs)
 
     def test_row_attrs_by_fieldset_iteration(self):
         """
@@ -403,8 +401,8 @@ class BetterFormTests(TestCase):
         fieldset = [fs for fs in form.fieldsets][0]
         honeypot = [field for field in fieldset if field.name=='honeypot'][0]
         attrs = honeypot.row_attrs
-        self.assertTrue(u'style="display: none"' in attrs)
-        self.assertTrue(u'class="required"' in attrs)
+        self.assertIn(u'style="display: none"', attrs)
+        self.assertIn(u'class="required"', attrs)
 
     def test_row_attrs_error_class(self):
         """
@@ -414,8 +412,8 @@ class BetterFormTests(TestCase):
         form = HoneypotForm({"honeypot": "something"})
 
         attrs = form['honeypot'].row_attrs
-        self.assertTrue(u'style="display: none"' in attrs)
-        self.assertTrue(u'class="required error"' in attrs)
+        self.assertIn(u'style="display: none"', attrs)
+        self.assertIn(u'class="required error"', attrs)
 
     def test_friendly_typo_error(self):
         """
@@ -488,8 +486,11 @@ class TemplatetagTests(TestCase):
 
         """
         form = BoringForm()
-        tpl = template.Template('{% load form_utils %}{{ form|render }}')
-        html = tpl.render(template.Context({'form': form}))
+        html = Template(
+            '{% load form_utils %}{{ form|render }}'
+        ).render(Context({
+            'form': form
+        }))
         self.assertHTMLEqual(html, self.boring_form_html)
 
     betterform_html = (
@@ -522,8 +523,11 @@ class TemplatetagTests(TestCase):
 
         """
         form = ApplicationForm()
-        tpl = template.Template('{% load form_utils %}{{ form|render }}')
-        html = tpl.render(template.Context({'form': form}))
+        html = Template(
+            '{% load form_utils %}{{ form|render }}'
+        ).render(Context({
+            'form': form
+        }))
         self.assertHTMLEqual(html, self.betterform_html)
 
 
@@ -537,8 +541,8 @@ class ImageWidgetTests(TestCase):
         html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
         # test only this much of the html, because the remainder will
         # vary depending on whether we have sorl-thumbnail
-        self.assertTrue('<img' in html)
-        self.assertTrue('/media/tiny' in html)
+        self.assertIn('<img', html)
+        self.assertIn('/media/tiny', html)
 
     def test_render_nonimage(self):
         """
@@ -583,7 +587,7 @@ class ClearableFileInputTests(TestCase):
         """
         widget = ClearableFileInput(file_widget=ImageWidget())
         html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
-        self.assertTrue('<img' in html)
+        self.assertIn('<img', html)
 
     def test_custom_file_widget_via_subclass(self):
         """
@@ -595,7 +599,7 @@ class ClearableFileInputTests(TestCase):
             default_file_widget_class = ImageWidget
         widget = ClearableImageWidget()
         html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
-        self.assertTrue('<img' in html)
+        self.assertIn('<img', html)
 
     def test_custom_template(self):
         """

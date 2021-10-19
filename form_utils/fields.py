@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import six
 from django import forms
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils import six
+from six import python_2_unicode_compatible
 
 from .widgets import ClearableFileInput
 
