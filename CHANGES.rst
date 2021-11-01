@@ -9,6 +9,7 @@ master (unreleased)
 - Fixed ``six`` imports.
 - Fixed compatibility issues with Django 3.0
 - Dropped support for Python 2.
+- Go Black.
 
 1.0.3 (2015-08-25)
 ------------------

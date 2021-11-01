@@ -1,3 +1,7 @@
+![master branch](https://github.com/wearespindle/django-form-utils/actions/workflows/main.yml/badge.svg?branch=master)
+This is a fork from the original django-form-utils that is updated to be
+compatible with Django 3.2 and a newer python version.
+
 =================
 django-form-utils
 =================
