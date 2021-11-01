@@ -5,8 +5,12 @@ import django
 import six
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db.models.fields.files import (FieldFile, FileField, ImageField,
-                                           ImageFieldFile)
+from django.db.models.fields.files import (
+    FieldFile,
+    FileField,
+    ImageField,
+    ImageFieldFile,
+)
 from django.template import Context, Template
 from django.test import TestCase
 from form_utils.fields import ClearableFileField, ClearableImageField
@@ -22,14 +26,16 @@ class ApplicationForm(BetterForm):
     A sample form with fieldsets.
 
     """
+
     name = forms.CharField()
     position = forms.CharField()
     reference = forms.CharField(required=False)
 
     class Meta:
-        fieldsets = (('main', {'fields': ('name', 'position'), 'legend': ''}),
-                     ('Optional', {'fields': ('reference',),
-                                   'classes': ('optional',)}))
+        fieldsets = (
+            ("main", {"fields": ("name", "position"), "legend": ""}),
+            ("Optional", {"fields": ("reference",), "classes": ("optional",)}),
+        )
 
 
 class InheritedForm(ApplicationForm):
@@ -38,6 +44,7 @@ class InheritedForm(ApplicationForm):
     its parents'.
 
     """
+
     pass
 
 
@@ -47,13 +54,19 @@ class MudSlingerApplicationForm(ApplicationForm):
     parents' fieldsets by using the logical Python code in Meta:
 
     """
+
     target = forms.CharField()
 
     class Meta:
         fieldsets = list(ApplicationForm.Meta.fieldsets)
-        fieldsets[0] = ('main', {'fields': ('name', 'position', 'target'),
-                                 'description': 'Basic mudslinging info',
-                                 'legend': 'basic info'})
+        fieldsets[0] = (
+            "main",
+            {
+                "fields": ("name", "position", "target"),
+                "description": "Basic mudslinging info",
+                "legend": "basic info",
+            },
+        )
 
 
 class FeedbackForm(BetterForm):
@@ -62,6 +75,7 @@ class FeedbackForm(BetterForm):
     single fieldset by default.
 
     """
+
     title = forms.CharField()
     name = forms.CharField()
 
@@ -76,11 +90,12 @@ class HoneypotForm(BetterForm):
     to still use a generic form-rendering template.
 
     """
+
     honeypot = forms.CharField()
     name = forms.CharField()
 
     class Meta:
-        row_attrs = {'honeypot': {'style': 'display: none'}}
+        row_attrs = {"honeypot": {"style": "display: none"}}
 
     def clean_honeypot(self):
         if self.cleaned_data.get("honeypot"):
@@ -92,17 +107,23 @@ class PersonForm(BetterModelForm):
     A ``BetterModelForm`` with fieldsets.
 
     """
+
     title = forms.CharField()
 
     class Meta:
         model = Person
-        fieldsets = [('main', {'fields': ['name'],
-                               'legend': '',
-                               'classes': ['main']}),
-                     ('More', {'fields': ['age'],
-                               'description': 'Extra information',
-                               'classes': ['more', 'collapse']}),
-                     (None, {'fields': ['title']})]
+        fieldsets = [
+            ("main", {"fields": ["name"], "legend": "", "classes": ["main"]}),
+            (
+                "More",
+                {
+                    "fields": ["age"],
+                    "description": "Extra information",
+                    "classes": ["more", "collapse"],
+                },
+            ),
+            (None, {"fields": ["title"]}),
+        ]
 
 
 class PartialPersonForm(BetterModelForm):
@@ -111,9 +132,10 @@ class PartialPersonForm(BetterModelForm):
     from the model.
 
     """
+
     class Meta:
         model = Person
-        fieldsets = [('main', {'fields': ['name']})]
+        fieldsets = [("main", {"fields": ["name"]})]
 
 
 class ManualPartialPersonForm(BetterModelForm):
@@ -122,10 +144,11 @@ class ManualPartialPersonForm(BetterModelForm):
     from the model, but we set ``fields`` manually.
 
     """
+
     class Meta:
         model = Person
-        fieldsets = [('main', {'fields': ['name']})]
-        fields = ['name', 'age']
+        fieldsets = [("main", {"fields": ["name"]})]
+        fields = ["name", "age"]
 
 
 class ExcludePartialPersonForm(BetterModelForm):
@@ -134,10 +157,11 @@ class ExcludePartialPersonForm(BetterModelForm):
     from the model, but we set ``exclude`` manually.
 
     """
+
     class Meta:
         model = Person
-        fieldsets = [('main', {'fields': ['name']})]
-        exclude = ['age']
+        fieldsets = [("main", {"fields": ["name"]})]
+        exclude = ["age"]
 
 
 class AcrobaticPersonForm(PersonForm):
@@ -146,13 +170,15 @@ class AcrobaticPersonForm(PersonForm):
     of its fieldsets.
 
     """
+
     agility = forms.IntegerField()
     speed = forms.IntegerField()
 
     class Meta(PersonForm.Meta):
         fieldsets = list(PersonForm.Meta.fieldsets)
         fieldsets = fieldsets[:1] + [
-            ('Acrobatics', {'fields': ('age', 'speed', 'agility')})]
+            ("Acrobatics", {"fields": ("age", "speed", "agility")})
+        ]
 
 
 class AbstractPersonForm(BetterModelForm):
@@ -160,6 +186,7 @@ class AbstractPersonForm(BetterModelForm):
     An abstract ``BetterModelForm`` without fieldsets.
 
     """
+
     title = forms.CharField()
 
     class Meta:
@@ -172,148 +199,165 @@ class InheritedMetaAbstractPersonForm(AbstractPersonForm):
     and adds fieldsets
 
     """
+
     class Meta(AbstractPersonForm.Meta):
         model = Person
-        fieldsets = [('main', {'fields': ['name'],
-                               'legend': '',
-                               'classes': ['main']}),
-                     ('More', {'fields': ['age'],
-                               'description': 'Extra information',
-                               'classes': ['more', 'collapse']}),
-                     (None, {'fields': ['title']})]
+        fieldsets = [
+            ("main", {"fields": ["name"], "legend": "", "classes": ["main"]}),
+            (
+                "More",
+                {
+                    "fields": ["age"],
+                    "description": "Extra information",
+                    "classes": ["more", "collapse"],
+                },
+            ),
+            (None, {"fields": ["title"]}),
+        ]
 
 
 class BetterFormTests(TestCase):
     fieldset_target_data = {
-        ApplicationForm:
-            [
-                    (['name', 'position'],
-                     {
-                                'name': 'main',
-                                'legend': '',
-                                'description': '',
-                                'classes': '',
-                                }),
-                    (['reference'],
-                    {
-                                'name': 'Optional',
-                                'legend': 'Optional',
-                                'description': '',
-                                'classes': 'optional'
-                                }),
-                    ],
-        InheritedForm:
-            [
-                    (['name', 'position'],
-                     {
-                                'name': 'main',
-                                'legend': '',
-                                'description': '',
-                                'classes': '',
-                                }),
-                    (['reference'],
-                    {
-                                'name': 'Optional',
-                                'legend': 'Optional',
-                                'description': '',
-                                'classes': 'optional'
-                                }),
-                    ],
-        MudSlingerApplicationForm:
-            [
-                    (['name', 'position', 'target'],
-                     {
-                                'name': 'main',
-                                'legend': 'basic info',
-                                'description': 'Basic mudslinging info',
-                                'classes': '',
-                                }),
-                    (['reference'],
-                    {
-                                'name': 'Optional',
-                                'legend': 'Optional',
-                                'description': '',
-                                'classes': 'optional'
-                                }),
-                    ],
-        FeedbackForm:
-            [
-                    (['title', 'name'],
-                     {
-                                'name': 'main',
-                                'legend': '',
-                                'description': '',
-                                'classes': '',
-                                }),
-                    ],
-        PersonForm:
-            [
-                    (['name'],
-                     {
-                                'name': 'main',
-                                'legend': '',
-                                'description': '',
-                                'classes': 'main',
-                                }),
-                    (['age'],
-                    {
-                                'name': 'More',
-                                'legend': 'More',
-                                'description': 'Extra information',
-                                'classes': 'more collapse'
-                                }),
-                    (['title'],
-                    {
-                                'name': None,
-                                'legend': None,
-                                'description': '',
-                                'classes': ''
-                                }),
-                    ],
-        AcrobaticPersonForm:
-            [
-                    (['name'],
-                     {
-                                'name': 'main',
-                                'legend': '',
-                                'description': '',
-                                'classes': 'main',
-                                }),
-                    (['age', 'speed', 'agility'],
-                    {
-                                'name': 'Acrobatics',
-                                'legend': 'Acrobatics',
-                                'description': '',
-                                'classes': ''
-                                }),
-                    ],
-            InheritedMetaAbstractPersonForm:
-            [
-                    (['name'],
-                     {
-                                'name': 'main',
-                                'legend': '',
-                                'description': '',
-                                'classes': 'main',
-                                }),
-                    (['age'],
-                    {
-                                'name': 'More',
-                                'legend': 'More',
-                                'description': 'Extra information',
-                                'classes': 'more collapse'
-                                }),
-                    (['title'],
-                    {
-                                'name': None,
-                                'legend': None,
-                                'description': '',
-                                'classes': ''
-                                }),
-                    ],
-
-
-        }
+        ApplicationForm: [
+            (
+                ["name", "position"],
+                {
+                    "name": "main",
+                    "legend": "",
+                    "description": "",
+                    "classes": "",
+                },
+            ),
+            (
+                ["reference"],
+                {
+                    "name": "Optional",
+                    "legend": "Optional",
+                    "description": "",
+                    "classes": "optional",
+                },
+            ),
+        ],
+        InheritedForm: [
+            (
+                ["name", "position"],
+                {
+                    "name": "main",
+                    "legend": "",
+                    "description": "",
+                    "classes": "",
+                },
+            ),
+            (
+                ["reference"],
+                {
+                    "name": "Optional",
+                    "legend": "Optional",
+                    "description": "",
+                    "classes": "optional",
+                },
+            ),
+        ],
+        MudSlingerApplicationForm: [
+            (
+                ["name", "position", "target"],
+                {
+                    "name": "main",
+                    "legend": "basic info",
+                    "description": "Basic mudslinging info",
+                    "classes": "",
+                },
+            ),
+            (
+                ["reference"],
+                {
+                    "name": "Optional",
+                    "legend": "Optional",
+                    "description": "",
+                    "classes": "optional",
+                },
+            ),
+        ],
+        FeedbackForm: [
+            (
+                ["title", "name"],
+                {
+                    "name": "main",
+                    "legend": "",
+                    "description": "",
+                    "classes": "",
+                },
+            ),
+        ],
+        PersonForm: [
+            (
+                ["name"],
+                {
+                    "name": "main",
+                    "legend": "",
+                    "description": "",
+                    "classes": "main",
+                },
+            ),
+            (
+                ["age"],
+                {
+                    "name": "More",
+                    "legend": "More",
+                    "description": "Extra information",
+                    "classes": "more collapse",
+                },
+            ),
+            (
+                ["title"],
+                {"name": None, "legend": None, "description": "", "classes": ""},
+            ),
+        ],
+        AcrobaticPersonForm: [
+            (
+                ["name"],
+                {
+                    "name": "main",
+                    "legend": "",
+                    "description": "",
+                    "classes": "main",
+                },
+            ),
+            (
+                ["age", "speed", "agility"],
+                {
+                    "name": "Acrobatics",
+                    "legend": "Acrobatics",
+                    "description": "",
+                    "classes": "",
+                },
+            ),
+        ],
+        InheritedMetaAbstractPersonForm: [
+            (
+                ["name"],
+                {
+                    "name": "main",
+                    "legend": "",
+                    "description": "",
+                    "classes": "main",
+                },
+            ),
+            (
+                ["age"],
+                {
+                    "name": "More",
+                    "legend": "More",
+                    "description": "Extra information",
+                    "classes": "more collapse",
+                },
+            ),
+            (
+                ["title"],
+                {"name": None, "legend": None, "description": "", "classes": ""},
+            ),
+        ],
+    }
 
     def test_iterate_fieldsets(self):
         """
@@ -329,8 +373,7 @@ class BetterFormTests(TestCase):
             for i, fs in enumerate(form.fieldsets):
                 target_data = targets[i]
                 # verify fieldset contains correct fields
-                self.assertEqual([f.name for f in fs],
-                                  target_data[0])
+                self.assertEqual([f.name for f in fs], target_data[0])
                 # verify fieldset has correct attributes
                 for attr, val in target_data[1].items():
                     self.assertEqual(getattr(fs, attr), val)
@@ -341,10 +384,11 @@ class BetterFormTests(TestCase):
         an ``ErrorDict``.
 
         """
-        form = ApplicationForm(data={'name': 'John Doe',
-                                     'reference': 'Jane Doe'})
-        self.assertEqual([fs.errors for fs in form.fieldsets],
-                          [{'position': [u'This field is required.']}, {}])
+        form = ApplicationForm(data={"name": "John Doe", "reference": "Jane Doe"})
+        self.assertEqual(
+            [fs.errors for fs in form.fieldsets],
+            [{"position": ["This field is required."]}, {}],
+        )
 
     def test_iterate_fields(self):
         """
@@ -354,8 +398,9 @@ class BetterFormTests(TestCase):
 
         """
         form = ApplicationForm()
-        self.assertEqual([field.name for field in form],
-                          ['name', 'position', 'reference'])
+        self.assertEqual(
+            [field.name for field in form], ["name", "position", "reference"]
+        )
 
     def test_getitem_fields(self):
         """
@@ -364,8 +409,8 @@ class BetterFormTests(TestCase):
 
         """
         form = ApplicationForm()
-        fieldset = form.fieldsets['main']
-        self.assertEqual(fieldset.name, 'main')
+        fieldset = form.fieldsets["main"]
+        self.assertEqual(fieldset.name, "main")
         self.assertEqual(len(fieldset.boundfields), 2)
 
     def test_row_attrs_by_name(self):
@@ -375,9 +420,9 @@ class BetterFormTests(TestCase):
 
         """
         form = HoneypotForm()
-        attrs = form['honeypot'].row_attrs
-        self.assertIn(u'style="display: none"', attrs)
-        self.assertIn(u'class="required"', attrs)
+        attrs = form["honeypot"].row_attrs
+        self.assertIn('style="display: none"', attrs)
+        self.assertIn('class="required"', attrs)
 
     def test_row_attrs_by_iteration(self):
         """
@@ -386,10 +431,10 @@ class BetterFormTests(TestCase):
 
         """
         form = HoneypotForm()
-        honeypot = [field for field in form if field.name=='honeypot'][0]
+        honeypot = [field for field in form if field.name == "honeypot"][0]
         attrs = honeypot.row_attrs
-        self.assertIn(u'style="display: none"', attrs)
-        self.assertIn(u'class="required"', attrs)
+        self.assertIn('style="display: none"', attrs)
+        self.assertIn('class="required"', attrs)
 
     def test_row_attrs_by_fieldset_iteration(self):
         """
@@ -399,10 +444,10 @@ class BetterFormTests(TestCase):
         """
         form = HoneypotForm()
         fieldset = [fs for fs in form.fieldsets][0]
-        honeypot = [field for field in fieldset if field.name=='honeypot'][0]
+        honeypot = [field for field in fieldset if field.name == "honeypot"][0]
         attrs = honeypot.row_attrs
-        self.assertIn(u'style="display: none"', attrs)
-        self.assertIn(u'class="required"', attrs)
+        self.assertIn('style="display: none"', attrs)
+        self.assertIn('class="required"', attrs)
 
     def test_row_attrs_error_class(self):
         """
@@ -411,9 +456,9 @@ class BetterFormTests(TestCase):
         """
         form = HoneypotForm({"honeypot": "something"})
 
-        attrs = form['honeypot'].row_attrs
-        self.assertIn(u'style="display: none"', attrs)
-        self.assertIn(u'class="required error"', attrs)
+        attrs = form["honeypot"].row_attrs
+        self.assertIn('style="display: none"', attrs)
+        self.assertIn('class="required error"', attrs)
 
     def test_friendly_typo_error(self):
         """
@@ -421,15 +466,17 @@ class BetterFormTests(TestCase):
         a tuple, we get a friendly error.
 
         """
+
         def _define_fieldsets_with_missing_comma():
             class ErrorForm(BetterForm):
                 one = forms.CharField()
                 two = forms.CharField()
+
                 class Meta:
-                    fieldsets = ((None, {'fields': ('one', 'two')}))
+                    fieldsets = (None, {"fields": ("one", "two")})
+
         # can't test the message here, but it would be TypeError otherwise
-        self.assertRaises(ValueError,
-                          _define_fieldsets_with_missing_comma)
+        self.assertRaises(ValueError, _define_fieldsets_with_missing_comma)
 
     def test_modelform_fields(self):
         """
@@ -437,7 +484,7 @@ class BetterFormTests(TestCase):
         populated with the fields present in a fieldsets definition.
 
         """
-        self.assertEqual(PartialPersonForm._meta.fields, ['name'])
+        self.assertEqual(PartialPersonForm._meta.fields, ["name"])
 
     def test_modelform_manual_fields(self):
         """
@@ -445,7 +492,7 @@ class BetterFormTests(TestCase):
         populated if it's set manually.
 
         """
-        self.assertEqual(ManualPartialPersonForm._meta.fields, ['name', 'age'])
+        self.assertEqual(ManualPartialPersonForm._meta.fields, ["name", "age"])
 
     def test_modelform_fields_exclude(self):
         """
@@ -456,29 +503,30 @@ class BetterFormTests(TestCase):
         self.assertEqual(ExcludePartialPersonForm._meta.fields, None)
 
 
-number_field_type = 'number' if django.VERSION > (1, 6, 0) else 'text'
-label_suffix = ':' if django.VERSION > (1, 6, 0) else ''
+number_field_type = "number" if django.VERSION > (1, 6, 0) else "text"
+label_suffix = ":" if django.VERSION > (1, 6, 0) else ""
 
 
 class BoringForm(forms.Form):
     boredom = forms.IntegerField()
     excitement = forms.IntegerField()
 
+
 class TemplatetagTests(TestCase):
     boring_form_html = (
-        u'<fieldset class="fieldset_main">'
-        u'<ul>'
-        u'<li>'
-        u'<label for="id_boredom">Boredom%(suffix)s</label>'
-        u'<input type="%(type)s" name="boredom" required id="id_boredom" />'
-        u'</li>'
-        u'<li>'
-        u'<label for="id_excitement">Excitement%(suffix)s</label>'
-        u'<input type="%(type)s" name="excitement" required id="id_excitement" />'
-        u'</li>'
-        u'</ul>'
-        u'</fieldset>'
-        ) % {'type': number_field_type, 'suffix': label_suffix}
+        '<fieldset class="fieldset_main">'
+        "<ul>"
+        "<li>"
+        '<label for="id_boredom">Boredom%(suffix)s</label>'
+        '<input type="%(type)s" name="boredom" required id="id_boredom" />'
+        "</li>"
+        "<li>"
+        '<label for="id_excitement">Excitement%(suffix)s</label>'
+        '<input type="%(type)s" name="excitement" required id="id_excitement" />'
+        "</li>"
+        "</ul>"
+        "</fieldset>"
+    ) % {"type": number_field_type, "suffix": label_suffix}
 
     def test_render_form(self):
         """
@@ -486,36 +534,34 @@ class TemplatetagTests(TestCase):
 
         """
         form = BoringForm()
-        html = Template(
-            '{% load form_utils %}{{ form|render }}'
-        ).render(Context({
-            'form': form
-        }))
+        html = Template("{% load form_utils %}{{ form|render }}").render(
+            Context({"form": form})
+        )
         self.assertHTMLEqual(html, self.boring_form_html)
 
     betterform_html = (
-        u'<fieldset class="">'
-        u'<ul>'
-        u'<li class="required">'
-        u'<label for="id_name">Name%(suffix)s</label>'
-        u'<input type="text" name="name" required id="id_name" />'
-        u'</li>'
-        u'<li class="required">'
-        u'<label for="id_position">Position%(suffix)s</label>'
-        u'<input type="text" name="position" required id="id_position" />'
-        u'</li>'
-        u'</ul>'
-        u'</fieldset>'
-        u'<fieldset class="optional">'
-        u'<legend>Optional</legend>'
-        u'<ul>'
-        u'<li class="optional">'
-        u'<label for="id_reference">Reference%(suffix)s</label>'
-        u'<input type="text" name="reference" id="id_reference" />'
-        u'</li>'
-        u'</ul>'
-        u'</fieldset>'
-        ) % {'suffix': label_suffix}
+        '<fieldset class="">'
+        "<ul>"
+        '<li class="required">'
+        '<label for="id_name">Name%(suffix)s</label>'
+        '<input type="text" name="name" required id="id_name" />'
+        "</li>"
+        '<li class="required">'
+        '<label for="id_position">Position%(suffix)s</label>'
+        '<input type="text" name="position" required id="id_position" />'
+        "</li>"
+        "</ul>"
+        "</fieldset>"
+        '<fieldset class="optional">'
+        "<legend>Optional</legend>"
+        "<ul>"
+        '<li class="optional">'
+        '<label for="id_reference">Reference%(suffix)s</label>'
+        '<input type="text" name="reference" id="id_reference" />'
+        "</li>"
+        "</ul>"
+        "</fieldset>"
+    ) % {"suffix": label_suffix}
 
     def test_render_betterform(self):
         """
@@ -524,11 +570,9 @@ class TemplatetagTests(TestCase):
         """
         self.maxDiff = None
         form = ApplicationForm()
-        html = Template(
-            '{% load form_utils %}{{ form|render }}'
-        ).render(Context({
-            'form': form
-        }))
+        html = Template("{% load form_utils %}{{ form|render }}").render(
+            Context({"form": form})
+        )
         self.assertHTMLEqual(html, self.betterform_html)
 
 
@@ -539,11 +583,13 @@ class ImageWidgetTests(TestCase):
 
         """
         widget = ImageWidget()
-        html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
+        html = widget.render(
+            "fieldname", ImageFieldFile(None, ImageField(), "tiny.png")
+        )
         # test only this much of the html, because the remainder will
         # vary depending on whether we have sorl-thumbnail
-        self.assertIn('<img', html)
-        self.assertIn('/media/tiny', html)
+        self.assertIn("<img", html)
+        self.assertIn("/media/tiny", html)
 
     def test_render_nonimage(self):
         """
@@ -551,7 +597,7 @@ class ImageWidgetTests(TestCase):
 
         """
         widget = ImageWidget()
-        html = widget.render('fieldname', FieldFile(None, FileField(), 'something.txt'))
+        html = widget.render("fieldname", FieldFile(None, FileField(), "something.txt"))
         self.assertHTMLEqual(html, '<input type="file" name="fieldname" />')
 
     def test_custom_template(self):
@@ -559,9 +605,13 @@ class ImageWidgetTests(TestCase):
         ``ImageWidget`` respects a custom template.
 
         """
-        widget = ImageWidget(template_name='tests/test_custom_template_imagewidget.html')
-        html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
-        self.assertTrue(html.startswith('<div><img'), html)
+        widget = ImageWidget(
+            template_name="tests/test_custom_template_imagewidget.html"
+        )
+        html = widget.render(
+            "fieldname", ImageFieldFile(None, ImageField(), "tiny.png")
+        )
+        self.assertTrue(html.startswith("<div><img"), html)
 
 
 class ClearableFileInputTests(TestCase):
@@ -572,13 +622,13 @@ class ClearableFileInputTests(TestCase):
 
         """
         widget = ClearableFileInput()
-        html = widget.render('fieldname', 'tiny.png')
+        html = widget.render("fieldname", "tiny.png")
         self.assertHTMLEqual(
             html,
             '<input type="file" name="fieldname_0" />'
-            ' Clear: '
-            '<input type="checkbox" name="fieldname_1" />'
-            )
+            " Clear: "
+            '<input type="checkbox" name="fieldname_1" />',
+        )
 
     def test_custom_file_widget(self):
         """
@@ -586,8 +636,10 @@ class ClearableFileInputTests(TestCase):
 
         """
         widget = ClearableFileInput(file_widget=ImageWidget())
-        html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
-        self.assertIn('<img', html)
+        html = widget.render(
+            "fieldname", ImageFieldFile(None, ImageField(), "tiny.png")
+        )
+        self.assertIn("<img", html)
 
     def test_custom_file_widget_via_subclass(self):
         """
@@ -595,57 +647,66 @@ class ClearableFileInputTests(TestCase):
         subclassing.
 
         """
+
         class ClearableImageWidget(ClearableFileInput):
             default_file_widget_class = ImageWidget
 
         widget = ClearableImageWidget()
-        html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
-        self.assertIn('<img', html)
+        html = widget.render(
+            "fieldname", ImageFieldFile(None, ImageField(), "tiny.png")
+        )
+        self.assertIn("<img", html)
 
     def test_custom_template(self):
         """
         ``ClearableFileInput`` respects its ``template`` argument.
 
         """
-        widget = ClearableFileInput(template_name='tests/test_custom_template_clearablefileinput.html')
-        html = widget.render('fieldname', ImageFieldFile(None, ImageField(), 'tiny.png'))
+        widget = ClearableFileInput(
+            template_name="tests/test_custom_template_clearablefileinput.html"
+        )
+        html = widget.render(
+            "fieldname", ImageFieldFile(None, ImageField(), "tiny.png")
+        )
         self.assertHTMLEqual(
             html,
-            'Clear: '
+            "Clear: "
             '<input type="checkbox" name="fieldname_1" /> '
-            '<input type="file" name="fieldname_0" />'
-            )
+            '<input type="file" name="fieldname_0" />',
+        )
 
     def test_custom_template_via_subclass(self):
         """
         Template can also be customized by subclassing.
 
         """
+
         class ReversedClearableFileInput(ClearableFileInput):
-            template_name = 'tests/test_custom_template_clearablefileinput.html'
+            template_name = "tests/test_custom_template_clearablefileinput.html"
 
         widget = ReversedClearableFileInput()
-        html = widget.render('fieldname', 'tiny.png')
+        html = widget.render("fieldname", "tiny.png")
         self.assertHTMLEqual(
             html,
-            'Clear: '
+            "Clear: "
             '<input type="checkbox" name="fieldname_1" /> '
-            '<input type="file" name="fieldname_0" />'
-            )
+            '<input type="file" name="fieldname_0" />',
+        )
 
 
 class ClearableFileFieldTests(TestCase):
-    upload = SimpleUploadedFile('something.txt', b'Something')
+    upload = SimpleUploadedFile("something.txt", b"Something")
 
     def test_bound_redisplay(self):
         class TestForm(forms.Form):
             f = ClearableFileField()
-        form = TestForm(files={'f_0': self.upload})
+
+        form = TestForm(files={"f_0": self.upload})
         self.assertHTMLEqual(
-            six.text_type(form['f']),
-            u'<input type="file" name="f_0" required id="id_f_0" />'
-            u' Clear: <input type="checkbox" name="f_1" required id="id_f_1" />'
-            )
+            six.text_type(form["f"]),
+            '<input type="file" name="f_0" required id="id_f_0" />'
+            ' Clear: <input type="checkbox" name="f_1" required id="id_f_1" />',
+        )
 
     def test_not_cleared(self):
         """
@@ -654,7 +715,7 @@ class ClearableFileFieldTests(TestCase):
 
         """
         field = ClearableFileField()
-        result = field.clean([self.upload, '0'])
+        result = field.clean([self.upload, "0"])
         self.assertEqual(result, self.upload)
 
     def test_cleared(self):
@@ -668,13 +729,13 @@ class ClearableFileFieldTests(TestCase):
         details. Here we just test the results.
 
         """
-        doc = Document.objects.create(myfile='something.txt')
+        doc = Document.objects.create(myfile="something.txt")
         field = ClearableFileField(required=False)
-        result = field.clean(['', '1'])
-        doc._meta.get_field('myfile').save_form_data(doc, result)
+        result = field.clean(["", "1"])
+        doc._meta.get_field("myfile").save_form_data(doc, result)
         doc.save()
         doc = Document.objects.get(pk=doc.pk)
-        self.assertEqual(doc.myfile, '')
+        self.assertEqual(doc.myfile, "")
 
     def test_cleared_but_file_given(self):
         """
@@ -683,7 +744,7 @@ class ClearableFileFieldTests(TestCase):
 
         """
         field = ClearableFileField()
-        result = field.clean([self.upload, '1'])
+        result = field.clean([self.upload, "1"])
         self.assertEqual(result, self.upload)
 
     def test_custom_file_field(self):
@@ -738,7 +799,7 @@ class ClearableFileFieldTests(TestCase):
         the widget.
 
         """
-        tpl = 'tests/test_custom_template_clearablefileinput'
+        tpl = "tests/test_custom_template_clearablefileinput"
         field = ClearableFileField(template_name=tpl)
         self.assertEqual(field.widget.template_name, tpl)
 
@@ -747,43 +808,47 @@ class ClearableFileFieldTests(TestCase):
         We can set a custom default widget by subclassing.
 
         """
+
         class ClearableImageWidget(ClearableFileInput):
             default_file_widget_class = ImageWidget
+
         class ClearableImageWidgetField(ClearableFileField):
             widget = ClearableImageWidget
+
         field = ClearableImageWidgetField()
         self.assertTrue(isinstance(field.widget, ClearableImageWidget))
 
 
-
-
 class FieldFilterTests(TestCase):
     """Tests for form field filters."""
+
     @property
     def form_utils(self):
         """The module under test."""
         from form_utils.templatetags import form_utils
-        return form_utils
 
+        return form_utils
 
     @property
     def form(self):
         """A sample form."""
+
         class PersonForm(forms.Form):
             name = forms.CharField(initial="none", required=True)
             level = forms.ChoiceField(
-                choices=(("b", "Beginner"), ("a", "Advanced")), required=False)
+                choices=(("b", "Beginner"), ("a", "Advanced")), required=False
+            )
             colors = forms.MultipleChoiceField(
-                choices=[("red", "red"), ("blue", "blue")])
+                choices=[("red", "red"), ("blue", "blue")]
+            )
             gender = forms.ChoiceField(
                 choices=(("m", "Male"), ("f", "Female"), ("o", "Other")),
                 widget=forms.RadioSelect(),
                 required=False,
-                )
+            )
             awesome = forms.BooleanField(required=False)
 
         return PersonForm
-
 
     @patch("form_utils.templatetags.form_utils.render_to_string")
     def test_label(self, render_to_string):
@@ -795,14 +860,8 @@ class FieldFilterTests(TestCase):
 
         self.assertEqual(label, "<label>something</label>")
         render_to_string.assert_called_with(
-            "forms/_label.html",
-            {
-                "label_text": "Name",
-                "id": "id_name",
-                "field": bf
-                }
-            )
-
+            "forms/_label.html", {"label_text": "Name", "id": "id_name", "field": bf}
+        )
 
     @patch("form_utils.templatetags.form_utils.render_to_string")
     def test_label_override(self, render_to_string):
@@ -813,31 +872,24 @@ class FieldFilterTests(TestCase):
 
         render_to_string.assert_called_with(
             "forms/_label.html",
-            {
-                "label_text": "override",
-                "id": "id_name",
-                "field": bf
-                }
-            )
-
+            {"label_text": "override", "id": "id_name", "field": bf},
+        )
 
     def test_value_text(self):
         """``value_text`` filter returns value of field."""
         self.assertEqual(
-            self.form_utils.value_text(self.form({"name": "boo"})["name"]), "boo")
-
+            self.form_utils.value_text(self.form({"name": "boo"})["name"]), "boo"
+        )
 
     def test_value_text_unbound(self):
         """``value_text`` filter returns default value of unbound field."""
         self.assertEqual(self.form_utils.value_text(self.form()["name"]), "none")
 
-
     def test_value_text_choices(self):
         """``value_text`` filter returns human-readable value of choicefield."""
         self.assertEqual(
-            self.form_utils.value_text(
-                self.form({"level": "a"})["level"]), "Advanced")
-
+            self.form_utils.value_text(self.form({"level": "a"})["level"]), "Advanced"
+        )
 
     def test_selected_values_choices(self):
         """``selected_values`` filter returns values of multiple select."""
@@ -846,18 +898,15 @@ class FieldFilterTests(TestCase):
         self.assertEqual(
             self.form_utils.selected_values(f["level"]),
             ["Advanced", "Beginner"],
-            )
-
+        )
 
     def test_optional_false(self):
         """A required field should not be marked optional."""
         self.assertFalse(self.form_utils.optional(self.form()["name"]))
 
-
     def test_optional_true(self):
         """A non-required field should be marked optional."""
         self.assertTrue(self.form_utils.optional(self.form()["level"]))
-
 
     def test_detect_checkbox(self):
         """``is_checkbox`` detects checkboxes."""
@@ -865,13 +914,11 @@ class FieldFilterTests(TestCase):
 
         self.assertTrue(self.form_utils.is_checkbox(f["awesome"]))
 
-
     def test_detect_non_checkbox(self):
         """``is_checkbox`` detects that select fields are not checkboxes."""
         f = self.form()
 
         self.assertFalse(self.form_utils.is_checkbox(f["level"]))
-
 
     def test_is_multiple(self):
         """`is_multiple` detects a MultipleChoiceField."""
@@ -879,13 +926,11 @@ class FieldFilterTests(TestCase):
 
         self.assertTrue(self.form_utils.is_multiple(f["colors"]))
 
-
     def test_is_not_multiple(self):
         """`is_multiple` detects a non-multiple widget."""
         f = self.form()
 
         self.assertFalse(self.form_utils.is_multiple(f["level"]))
-
 
     def test_is_select(self):
         """`is_select` detects a ChoiceField."""
@@ -893,20 +938,17 @@ class FieldFilterTests(TestCase):
 
         self.assertTrue(self.form_utils.is_select(f["level"]))
 
-
     def test_is_not_select(self):
         """`is_select` detects a non-ChoiceField."""
         f = self.form()
 
         self.assertFalse(self.form_utils.is_select(f["name"]))
 
-
     def test_is_radio(self):
         """`is_radio` detects a radio select widget."""
         f = self.form()
 
         self.assertTrue(self.form_utils.is_radio(f["gender"]))
-
 
     def test_is_not_radio(self):
         """`is_radio` detects a non-radio select."""

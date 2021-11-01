@@ -8,21 +8,21 @@ from django.conf import settings
 
 if not settings.configured:
     settings_dict = dict(
-        INSTALLED_APPS=['form_utils', 'tests'],
+        INSTALLED_APPS=["form_utils", "tests"],
         DATABASES={
             "default": {
                 "ENGINE": "django.db.backends.sqlite3",
-                }
-            },
-        MEDIA_ROOT=os.path.join(os.path.dirname(__file__), 'media'),
-        MEDIA_URL='/media/',
-        STATIC_URL='/static/',
+            }
+        },
+        MEDIA_ROOT=os.path.join(os.path.dirname(__file__), "media"),
+        MEDIA_URL="/media/",
+        STATIC_URL="/static/",
         MIDDLEWARE_CLASSES=[],
         TEMPLATES=[
             {
-                'BACKEND': 'django.template.backends.django.DjangoTemplates',
-                'DIRS': [],
-                'APP_DIRS': True,
+                "BACKEND": "django.template.backends.django.DjangoTemplates",
+                "DIRS": [],
+                "APP_DIRS": True,
             },
         ],
     )
@@ -35,7 +35,7 @@ django.setup()
 
 def runtests(*test_args):
     if not test_args:
-        test_args = ['tests']
+        test_args = ["tests"]
 
     parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.insert(0, parent)
@@ -44,10 +44,11 @@ def runtests(*test_args):
         from django.test.runner import DiscoverRunner as Runner
     except ImportError:
         from django.test.simple import DjangoTestSuiteRunner as Runner
-    failures = Runner(
-        verbosity=1, interactive=True, failfast=False).run_tests(test_args)
+    failures = Runner(verbosity=1, interactive=True, failfast=False).run_tests(
+        test_args
+    )
     sys.exit(failures)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runtests()

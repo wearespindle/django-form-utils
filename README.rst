@@ -34,7 +34,7 @@ Installation
 
 Install from PyPI with ``easy_install`` or ``pip``::
 
-    pip install django-form-utils
+    pip install https://github.com/wearespindle/django-form-utils/archive/refs/heads/master.zip
 
 To use ``django-form-utils`` in your Django project, just include
 ``form_utils`` in your INSTALLED_APPS setting.  ``django-form-utils`` does
@@ -48,8 +48,8 @@ and ``templates/form_utils/form.html``.
 Dependencies
 ------------
 
-``django-form-utils`` is tested on `Django`_ 1.4 and later and `Python`_ 2.6,
-2.7, and 3.3. It is known to be incompatible with Python 3.0, 3.1, and 3.2.
+``django-form-utils`` is tested on `Django`_ 2.2, 3.0, 3.1, 3.2 and later and
+`Python`_ 3.8, 3.9 and 3.10.
 
 `ImageWidget`_ requires the `Python Imaging Library`_.
 `sorl-thumbnail`_ or `easy-thumbnails`_ is optional, but without it
@@ -312,7 +312,7 @@ field class::
         pdf = ClearableFileField()
 
 ``ClearableFileField`` also accepts two keyword arguments,
-``file_field`` and ``template``.
+``file_field`` and ``template_name``.
 
 ``file_field`` is the instantiated field to actually use for
 representing the file portion. For instance, if you want to use
@@ -331,11 +331,11 @@ use `ImageWidget`_, you could do the following::
 By default, ``file_field`` is a plain ``forms.FileField`` with the
 default ``forms.FileInput`` widget.
 
-``template`` is a string defining how the ``FileField`` (or
-alternative ``file_field``) and the clear checkbox are displayed in
-relation to each other. The template string should contain variable
-interpolation markers ``%(input)s`` and ``%(checkbox)s``. The default
-value is ``%(input)s Clear: %(checkbox)s``.
+``template_name`` is a string defining the path to a template which
+tells how the ``FileField`` (or alternative ``file_field``) and the
+clear checkbox are displayed in relation to each other. The template
+string should contain variable interpolation markers ``%(input)s`` and
+``%(checkbox)s``. The default value is ``%(input)s Clear: %(checkbox)s``.
 
 To use ``ClearableFileField`` in the admin; just inherit your admin
 options class from ``form_utils.admin.ClearableFileFieldsAdmin``
@@ -362,21 +362,17 @@ otherwise the full-size image is displayed). To use, just pass in as
 the widget class for an ``ImageField``::
 
     from django import forms
-     
+
     from form_utils.widgets import ImageWidget
-    
+
     class MyForm(forms.Form):
         pic = forms.ImageField(widget=ImageWidget())
 
-``ImageWidget`` accepts a keyword argument, ``template``. This is a
-string defining how the image thumbnail and the file input widget are
-rendered relative to each other. The template string should contain
-variable interpolation markers ``%(input)s`` and ``%(image)s``. The
-default value is ``%(input)s<br />%(image)s``. For example, to display
-the image above the input rather than below::
-
-    pic = forms.ImageField(
-        widget=ImageWidget(template='%(image)s<br />%(input)s'))
+``ImageWidget`` accepts a keyword argument, ``template_name``. This is a
+string with a path to a template which is defining how the image
+thumbnail and the file input widget are rendered relative to each other.
+The template string should contain variable interpolation markers ``%
+(input)s`` and ``%(image)s``. The default value is ``%(input)s<br />%(image)s``.
 
 To use in the admin, set as the default widget for ``ImageField``
 using ``formfield_overrides``::
@@ -397,7 +393,7 @@ Just import the widget and assign it to a form field::
 
     from django import forms
     from form_utils.widgets import AutoResizeTextarea
-    
+
     class MyForm(forms.Form):
         description = forms.CharField(widget=AutoResizeTextarea())
 
@@ -406,7 +402,7 @@ Or use it in ``formfield_overrides`` in your ``ModelAdmin`` subclass::
     from django import forms
     from django.contrib import admin
     from form_utils.widgets import AutoResizeTextarea
-    
+
     class MyModelAdmin(admin.ModelAdmin):
         formfield_overrides = {forms.CharField: {'widget': AutoResizeTextarea()}}
 
